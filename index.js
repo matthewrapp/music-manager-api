@@ -42,8 +42,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use(authRoutes);
-app.use(gameRoutes);
+// app.use(authRoutes);
+// app.use(gameRoutes);
 
 // database connection
 mongoose.Promise = global.Promise;
