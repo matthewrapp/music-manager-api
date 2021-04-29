@@ -17,7 +17,7 @@ app.use(bodyparser.json());
 app.use(cookieParser());
 
 app.get('/', function (req, res) {
-  res.status(200).send({ message: 'Welcome to Music Manager API.' });
+  res.status(200).send({ message: 'Welcome to Music Manager API..' });
 });
 
 app.use((req, res, next) => {
