@@ -6,8 +6,6 @@ const bodyparser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const envs = require('./config/env');
 const config = require('./config/config').get(envs.NODE_ENV);
-const authRoutes = require('./routes/auth');
-const gameRoutes = require('./routes/game');
 
 const app = express();
 app.use(
@@ -42,8 +40,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// app.use(authRoutes);
-// app.use(gameRoutes);
+// Routes go here
 
 // database connection
 mongoose.Promise = global.Promise;
