@@ -7,6 +7,8 @@ const cookieParser = require('cookie-parser');
 const envs = require('./config/env');
 const config = require('./config/config').get(envs.NODE_ENV);
 
+const authRoutes = require('./routes/auth');
+
 const app = express();
 app.use(
   bodyparser.urlencoded({
@@ -40,6 +42,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Routes go here
+app.use(authRoutes);
 
 // database connection
 mongoose.Promise = global.Promise;
