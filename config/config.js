@@ -3,14 +3,12 @@ const envs = require('./env');
 const config = {
   production: {
     SECRET: envs.DB_SECRET,
-    DATABASE: envs.MONGODB_URI,
-    CUSTOM_ORIGIN: envs.CUSTOM_ORIGIN
+    DATABASE: envs.MONGODB_URI
   },
   default: {
     SECRET: 'mysecretkey',
     // We are going to connect to a trivia-dev DB collection if this is not production to keep the production data clean.
-    DATABASE: envs.MONGODB_URI_LOCAL,
-    CUSTOM_ORIGIN: envs.CUSTOM_ORIGIN_LOCAL
+    DATABASE: envs.MONGODB_URI_LOCAL
   },
 };
 

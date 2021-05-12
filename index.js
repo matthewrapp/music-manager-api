@@ -37,7 +37,7 @@ app.get('/', function (req, res) {
 // });
 
 const corsOptions = {
-  origin: config.CUSTOM_ORIGIN,
+  origin: 'https://609c21bcc786fb0007e032cd--music-manager-client.netlify.app',
   credentials: true
 };
 app.use(cors(corsOptions));
