@@ -9,7 +9,6 @@ const config = require('./config/config').get(envs.NODE_ENV);
 
 const authRoutes = require('./routes/auth');
 const artistRoutes = require('./routes/artist');
-const e = require('express');
 
 const app = express();
 app.use(
