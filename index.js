@@ -9,6 +9,7 @@ const config = require('./config/config').get(envs.NODE_ENV);
 
 const authRoutes = require('./routes/auth');
 const artistRoutes = require('./routes/artist');
+const e = require('express');
 
 const app = express();
 app.use(
@@ -36,11 +37,30 @@ app.get('/', function (req, res) {
 //   next();
 // });
 
+
+// const corsOptions = {
+//   origin: 'https://609c21bcc786fb0007e032cd--music-manager-client.netlify.app',
+//   credentials: true
+// };
+// app.use(cors(corsOptions));
+
+const whitelist = ['http://localhost:3000', 'https://609c21bcc786fb0007e032cd--music-manager-client.netlify.app'];
 const corsOptions = {
-  origin: 'https://609c21bcc786fb0007e032cd--music-manager-client.netlify.app',
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true
 };
-app.use(cors(corsOptions));
+app.use(cors(corsOptions, (req, res, next) => {
+  return res.json({
+    message: 'This is a CORS-enabled for a whitelisted Domain!'
+  })
+}));
+
 
 // Routes go here
 app.use(authRoutes);
