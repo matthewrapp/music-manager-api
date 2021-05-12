@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const envs = require('./config/env');
-const config = require('./config/config').get(envs.NODE_ENV);
+// const config = require('./config/config').get(envs.NODE_ENV);
 
 const authRoutes = require('./routes/auth');
 const artistRoutes = require('./routes/artist');
