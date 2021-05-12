@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
 const {
     postSignup,
