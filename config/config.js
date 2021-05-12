@@ -10,6 +10,7 @@ const config = {
     SECRET: 'mysecretkey',
     // We are going to connect to a trivia-dev DB collection if this is not production to keep the production data clean.
     DATABASE: envs.MONGODB_URI_LOCAL,
+    CUSTOM_ORIGIN: envs.CUSTOM_ORIGIN_LOCAL
   },
 };
 
