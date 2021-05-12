@@ -23,41 +23,39 @@ app.get('/', function (req, res) {
   res.status(200).send({ message: 'Welcome to Music Manager API..' });
 });
 
-// app.use((req, res, next) => {
-//   // '*' allows all clients to access the server through the API
-//   // Otherwise, you can allow only certain domains by placing them in, using commas to separate
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader(
-//     'Access-Control-Allow-Methods',
-//     'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-//   );
-//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//   res.setHeader('Access-Control-Allow-Credentials', true);
-//   next();
-// });
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+  );
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 
 // const corsOptions = {
-//   origin: 'https://609c21bcc786fb0007e032cd--music-manager-client.netlify.app',
+//   origin: '*',
 //   credentials: true
 // };
 // app.use(cors(corsOptions));
 
-const whitelist = ['http://localhost:3000', 'https://music-manager-client.netlify.app'];
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
-  credentials: true
-};
-app.use(cors(corsOptions, (req, res, next) => {
-  return res.json({
-    message: 'This is a CORS-enabled for a whitelisted Domain!'
-  })
+// const whitelist = ['http://localhost:3000', 'https://music-manager-client.netlify.app'];
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true)
+//     } else {
+//       callback(new Error('Not allowed by CORS'))
+//     }
+//   },
+//   credentials: true
+// };
+// app.use(cors(corsOptions, (req, res, next) => {
+//   return res.json({
+//     message: 'This is a CORS-enabled for a whitelisted Domain!'
+//   })
 }));
 
 
