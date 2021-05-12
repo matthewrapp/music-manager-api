@@ -28,7 +28,12 @@ const userSchema = mongoose.Schema({
     date: {
         type: Date,
         default: Date.now()
-    }
+    },
+    artist: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Artist',
+        default: null
+    }]
 });
 
 module.exports = mongoose.model('User', userSchema);

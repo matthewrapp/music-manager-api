@@ -1,11 +1,11 @@
 const User = require('../models/user');
+const Artist = require('../models/artist');
 
 const config = require('../config/config').get(process.env.NODE_ENV);
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { use } = require('../routes/auth');
-const user = require('../models/user');
+const artist = require('../models/artist');
 const salt = 12;
 
 exports.postSignup = (req, res, next) => {
@@ -78,22 +78,6 @@ exports.postLogin = (req, res, next) => {
                 message: 'User doesn\'t exist. Please sign up.'
             })
         }
-        // check to see if user is already logged in
-        // jwt.verify(token, config.SECRET, function (err, userId) {
-        //     User.findOne({
-        //         _id: userId,
-        //         token: token
-        //     }, function (err, user) {
-        //         if (err) {
-        //             return res(err)
-        //         }
-        //         if (user) {
-        //             return res.status(400).json({
-        //                 message: 'You are already logged in',
-        //             })
-        //         }
-        //     })
-        // })
         
         bcrypt.compare(password, user.password)
             .then(doMatch => {
@@ -108,6 +92,7 @@ exports.postLogin = (req, res, next) => {
                     userId: user._id,
                     email: user.email
                 }
+
                 const token = jwt.sign(payload, config.SECRET);
                 res.cookie('auth', token, {
                     httpOnly: true
@@ -115,7 +100,8 @@ exports.postLogin = (req, res, next) => {
                     isAuth: true,
                     token: token,
                     id: user._id,
-                    email: user.email
+                    email: user.email,
+                    artists: user.artist
                 })
             })
     })
@@ -146,7 +132,8 @@ exports.postDeleteUser = (req, res, next) => {
         })
 }
 
-exports.getUserProfile = (req, res, next) => {
+exports.getUserProfile = async (req, res, next) => {
+
     User.findById(req.user.userId)
         .then(user => {
             if (!user) {
@@ -159,7 +146,8 @@ exports.getUserProfile = (req, res, next) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                date: user.date
+                date: user.date,
+                artistsObjectIds: user.artist
             })
         })
 }
