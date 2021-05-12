@@ -56,7 +56,7 @@ app.use((req, res, next) => {
 //   return res.json({
 //     message: 'This is a CORS-enabled for a whitelisted Domain!'
 //   })
-}));
+// }));
 
 
 // Routes go here
