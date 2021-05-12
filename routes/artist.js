@@ -10,7 +10,7 @@ const {
 router.post('/api/create-artist', auth, postCreateArtist);
 router.get('/api/artists', auth, getAllArtists);
 
-router.get('/check-token', auth, function(req, res) {
+router.get('/api/check-token', auth, function(req, res) {
   res.sendStatus(200);
 });
 
