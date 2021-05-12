@@ -43,7 +43,7 @@ app.get('/', function (req, res) {
 // };
 // app.use(cors(corsOptions));
 
-const whitelist = ['http://localhost:3000', 'https://609c21bcc786fb0007e032cd--music-manager-client.netlify.app'];
+const whitelist = ['http://localhost:3000', 'https://music-manager-client.netlify.app/'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
