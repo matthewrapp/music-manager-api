@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const user = require('../models/user');
 const artist = require('../models/artist');
-const { reset } = require('nodemon');
 const salt = 12;
 
 
