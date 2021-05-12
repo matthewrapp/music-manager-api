@@ -37,7 +37,7 @@ app.get('/', function (req, res) {
 // });
 
 const corsOptions = {
-  origin: process.env.CUSTOM_ORIGIN,
+  origin: config.CUSTOM_ORIGIN,
   credentials: true
 };
 app.use(cors(corsOptions));

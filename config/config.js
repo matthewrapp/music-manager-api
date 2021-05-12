@@ -4,6 +4,7 @@ const config = {
   production: {
     SECRET: envs.DB_SECRET,
     DATABASE: envs.MONGODB_URI,
+    CUSTOM_ORIGIN: envs.CUSTOM_ORIGIN
   },
   default: {
     SECRET: 'mysecretkey',
