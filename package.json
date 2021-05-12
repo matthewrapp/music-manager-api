@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"
   },
-  "author": "Matthew Rapp, Ian Petty, Jonathan Rivera",
+  "author": "Matthew Rapp",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.0",
