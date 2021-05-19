@@ -13,10 +13,16 @@ const salt = 12;
 exports.postCreateArtist = (req, res, next) => {
     const artistName = req.body.artistName;
     const artistBio = req.body.artistBio;
+    console.log(req.body);
 
     const newArtist = new Artist({
         artistName: artistName,
         artistBio: artistBio,
+        socialMedia: {
+            facebook: req.body.facebook,
+            instagram: req.body.instagram,
+            soundcloud: req.body.soundcloud
+        },
         userId: req.user.userId
     });
 
