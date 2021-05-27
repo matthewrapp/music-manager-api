@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-// const jwt = require('jsonwebtoken');
-// const bcrypt = require('bcrypt');
-// const salt = 12;
 
 const artistSchema = mongoose.Schema({
     artistName: {
@@ -33,6 +30,10 @@ const artistSchema = mongoose.Schema({
             type: String,
             default: null
         }
+    },
+    primary: {
+        type: Boolean,
+        default: false
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

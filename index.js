@@ -1,16 +1,21 @@
 const express = require('express');
-const path = require('path');
-const cors = require('cors');
 const mongoose = require('mongoose');
+
 const bodyparser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const envs = require('./config/env');
 const config = require('./config/config').get(envs.NODE_ENV);
 
+// multer
+const multer = require('multer');
+const upload = multer({dest: 'images/'});
+
 const authRoutes = require('./routes/auth');
 const artistRoutes = require('./routes/artist');
+const campaignRoutes = require('./routes/campaign');
 
 const app = express();
+
 app.use(
   bodyparser.urlencoded({
     extended: false,
@@ -34,34 +39,13 @@ app.use((req, res, next) => {
   next();
 });
 
-
-// const corsOptions = {
-//   origin: '*',
-//   credentials: true
-// };
-// app.use(cors(corsOptions));
-
-// const whitelist = ['http://localhost:3000', 'https://music-manager-client.netlify.app'];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (whitelist.indexOf(origin) !== -1) {
-//       callback(null, true)
-//     } else {
-//       callback(new Error('Not allowed by CORS'))
-//     }
-//   },
-//   credentials: true
-// };
-// app.use(cors(corsOptions, (req, res, next) => {
-//   return res.json({
-//     message: 'This is a CORS-enabled for a whitelisted Domain!'
-//   })
-// }));
-
+// multer
+app.use(upload.single('artworkUrl')); 
 
 // Routes go here
 app.use(authRoutes);
 app.use(artistRoutes);
+app.use(campaignRoutes);
 
 // database connection
 mongoose.Promise = global.Promise;
