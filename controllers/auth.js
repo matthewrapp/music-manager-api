@@ -1,11 +1,12 @@
 const User = require('../models/user');
 const Artist = require('../models/artist');
+const Campaign = require('../models/campaign');
 
 const config = require('../config/config').get(process.env.NODE_ENV);
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const artist = require('../models/artist');
+const campaign = require('../models/campaign');
 const salt = 12;
 
 exports.postSignup = (req, res, next) => {
@@ -86,7 +87,7 @@ exports.postLogin = (req, res, next) => {
                         message: 'Password does not match. Try again.'
                     })
                 }
-
+                
                 // sending back the token
                 const payload = {
                     userId: user._id,
@@ -101,7 +102,8 @@ exports.postLogin = (req, res, next) => {
                     token: token,
                     id: user._id,
                     email: user.email,
-                    artists: user.artist
+                    allUserArtists: user.artists,
+                    selectedArtist: user.artists[0]
                 })
             })
     })
@@ -113,20 +115,29 @@ exports.postLogout = (req, res, next) => {
     })
 }
 
-exports.postDeleteUser = (req, res, next) => {
-    User.findById(req.user.userId)
-        .then(user => {
+exports.postDeleteUser = async (req, res, next) => {
+
+    Campaign.deleteMany({
+        userId: req.user.userId
+    })
+        .then(() => {
+            return Artist.deleteMany({
+                userId: req.user.userId
+            })
+        })
+        .then(() => {
             return User.deleteOne({
-                _id: user._id
+                _id: req.user.userId
             })
         })
         .then(result => {
             return res.status(200).json({
-                message: 'User deleted.'
+                result: result,
+                message: 'User successfully deleted.'
             })
         })
         .catch(err => {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: err
             })
         })
@@ -147,7 +158,8 @@ exports.getUserProfile = async (req, res, next) => {
                 lastName: user.lastName,
                 email: user.email,
                 date: user.date,
-                artistsObjectIds: user.artist
+                artistIds: user.artists,
+                primaryArtistId: user.artists[0]
             })
         })
 }

@@ -13,7 +13,7 @@ const {
 router.post('/api/register', postSignup);
 router.post('/api/login', postLogin);
 router.post('/api/logout', auth, postLogout);
-router.post('/api/delete-user', auth, postDeleteUser)
-router.get('/api/user-profile', auth, getUserProfile)
-
+router.post('/api/delete-user', auth, postDeleteUser);
+router.get('/api/user-profile', auth, getUserProfile);
+    
 module.exports = router;
