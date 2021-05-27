@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-// const jwt = require('jsonwebtoken');
-// const bcrypt = require('bcrypt');
-// const salt = 12;
 
 const userSchema = mongoose.Schema({
     firstName: {
@@ -25,11 +22,16 @@ const userSchema = mongoose.Schema({
         require: true,
         minlength: 8
     },
+    imageUrl: {
+        type: String,
+        require: true,
+        default: 'https://ucarecdn.com/c63defb0-b5b6-4d0f-b8e7-5e497ce19c95/-/preview/'
+    },
     date: {
         type: Date,
         default: Date.now()
     },
-    artist: [{
+    artists: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Artist',
         default: null
