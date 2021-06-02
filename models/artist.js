@@ -33,7 +33,8 @@ const artistSchema = mongoose.Schema({
     },
     imageUrl: {
         type: String,
-        require: true
+        require: true,
+        default: 'https://ucarecdn.com/8ce6f979-1eb6-49a9-ad88-b5c2220f2f5e/-/preview/'
     },
     primary: {
         type: Boolean,

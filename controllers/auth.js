@@ -13,97 +13,78 @@ const campaign = require('../models/campaign');
 const salt = 12;
 
 exports.postSignup = (req, res, next) => {
-    const email = req.body.email;
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
     
     // check if passwords match
-    if (password != confirmPassword) {
+    if (req.body.password != req.body.confirmPassword) {
         return res.status(400).json({
             message: 'Passwords do not match.',
         });
     }
+    // check to see if email exists
+    User.findOne({
+        email: req.body.email
+    })
+        .then(user => {
+            if (user) {
+                return res.status(400).json({
+                    message: 'User already exists.'
+                })
+            }
 
-    let path;
-    // if there is a path, meaning an image to upload
-    if (req.files !== undefined) {
-        path = req.files.profileImg[0].path;
+            // hash password and create user
+            bcrypt.hash(req.body.password, salt)
+                .then(hashedPassword => {
+                    const newUser = User({
+                        firstName: req.body.firstName,
+                        lastName: req.body.lastName,
+                        email: req.body.email,
+                        password: hashedPassword
+                    });
+                    // save user to db
+                    return newUser.save();
+                })
+                .then(result => {
+                    return res.status(200).json({
+                        result: result
+                    })
+                })
+                .catch(err => {
+                    return res.status(500).json({
+                        message: err
+                    })
+                })
+        })
+        .catch(err => {
+             return res.status(500).json({
+                message: err
+            })
+        })
+    
+}
 
-        uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
+exports.postUploadUserImage = (req, res, next) => {
+    const path = req.files.profileImg[0].path;
+    const userId = req.user.userId;
+
+    uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
+        if (err) {
+            return res.status(400).json({
+                message: err
+            })
+        }
+
+        uploadcare.files.info(response.file, (err, data) => {
             if (err) {
                 return res.status(400).json({
                     message: err
                 })
             }
 
-            uploadcare.files.info(response.file, (err, data) => {
-                if (err) {
-                    return res.status(400).json({
-                        message: err
-                    })
-                }
-
-                // check to see if email exists
-                User.findOne({
-                    email: email
-                })
-                    .then(user => {
-                        if (user) {
-                            fs.unlink(path, (err) => {
-                                if (err) {
-                                    console.log(err)
-                                    return
-                                }
-                            })
-
-                            return res.status(400).json({
-                                message: 'User already exists.'
-                            })
-                        }
-        
-                        const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
-    
-                        // hash password and create user
-                        bcrypt.hash(password, salt)
-                            .then(hashedPassword => {
-                                const newUser = User({
-                                    firstName: firstName,
-                                    lastName: lastName,
-                                    email: email,
-                                    password: hashedPassword,
-                                    imageUrl: imageUrl
-                                });
-                                // save user to db
-                                return newUser.save();
-                            })
-                            .then(result => {
-                                fs.unlink(path, (err) => {
-                                    if (err) {
-                                        console.log(err)
-                                        return
-                                    }
-                                })
-                                return res.status(200).json({
-                                    result: result
-                                })
-                            })
-                            .catch(err => {
-                                return res.status(500).json({
-                                    message: err
-                                })
-                            })
-                    })
+            const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
+            User.updateOne({ _id: userId }, {
+                imageUrl: imageUrl
             })
-        })
-    } else {
-        // check to see if email exists
-        User.findOne({
-            email: email
-        })
-            .then(user => {
-                if (user) {
+                .then(result => {
                     fs.unlink(path, (err) => {
                         if (err) {
                             console.log(err)
@@ -111,38 +92,36 @@ exports.postSignup = (req, res, next) => {
                         }
                     })
 
+                    return res.status(200).json({
+                        message: 'Image Updated, Successful.'
+                    })
+                })
+                .catch(err => {
                     return res.status(400).json({
-                        message: 'User already exists.'
+                        message: err
                     })
-                }
+                })
+            // this way will be depreciated
+            // User.findByIdAndUpdate(userId, {
+            //     imageUrl: imageUrl
+            // })
+            //     .then(user => {
+            //         fs.unlink(path, (err) => {
+            //             if (err) {
+            //                 console.log(err)
+            //                 return
+            //             }
+            //         })
 
-                // hash password and create user
-                bcrypt.hash(password, salt)
-                    .then(hashedPassword => {
-                        const newUser = User({
-                            firstName: firstName,
-                            lastName: lastName,
-                            email: email,
-                            password: hashedPassword
-                        });
-                        // save user to db
-                        return newUser.save();
-                    })
-                    .then(result => {
-                        return res.status(200).json({
-                            result: result
-                        })
-                    })
-                    .catch(err => {
-                        return res.status(500).json({
-                            message: err
-                        })
-                    })
-            })
-    } 
+            //         return res.status(200).json({
+            //             result: user
+            //         })
+            //     })
 
-    
-};
+
+        })
+    })
+}
 
 exports.postLogin = (req, res, next) => {
     const email = req.body.email;
@@ -240,9 +219,11 @@ exports.getUserProfile = async (req, res, next) => {
             }
 
             return res.status(200).json({
+                userId: user._id,
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                imageUrl: user.imageUrl,
                 date: user.date,
                 artistIds: user.artists,
                 primaryArtistId: user.artists[0]

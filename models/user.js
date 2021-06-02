@@ -25,7 +25,7 @@ const userSchema = mongoose.Schema({
     imageUrl: {
         type: String,
         require: true,
-        default: 'https://ucarecdn.com/c63defb0-b5b6-4d0f-b8e7-5e497ce19c95/-/preview/'
+        default: 'https://ucarecdn.com/8ce6f979-1eb6-49a9-ad88-b5c2220f2f5e/-/preview/'
     },
     date: {
         type: Date,

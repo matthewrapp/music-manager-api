@@ -34,7 +34,8 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, PATCH, DELETE, OPTIONS'
   );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers");
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
@@ -68,6 +69,8 @@ mongoose.connect(
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
   },
   function (err) {
     if (err) console.log(err);

@@ -6,7 +6,44 @@ const uploadcare = require('../node_modules/uploadcare/lib/main')(`${process.env
 const fs = require('fs');
 
 exports.postCreateCampaign = (req, res, next) => {
-    const path = req.files.campaginImg[0].path;
+    
+    Artist.findById(req.body.artistId)
+        .then(artist => {
+            if (artist === null) {
+                return res.status(400).json({
+                    message: 'There are no artists. Please create one, first.'
+                })
+            }
+
+            const campaign = new Campaign({
+                songName: req.body.songName,
+                releaseDate: req.body.releaseDate,
+                userId: req.user.userId,
+                artistId: artist._id
+            });
+    
+            campaign.save()
+                .then(campaign => {
+                    return res.status(200).json({
+                        result: campaign
+                    })
+                })
+                .catch(err => {
+                    return res.status(400).json({
+                        message: err
+                    })
+                })
+        })
+        .catch(err => {
+            return res.status(500).json({
+                message: err
+            })
+        })
+};
+
+exports.postUploadCampaignImage = (req, res, next) => {
+    const path = req.files.campaignImg[0].path;
+    const campaignId = req.body.campaignId;
 
     uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
         if (err) {
@@ -22,53 +59,30 @@ exports.postCreateCampaign = (req, res, next) => {
                 })
             }
 
-            Artist.findById(req.body.artistId)
-                .then(artist => {
-                    if (artist === null) {
-                        fs.unlink(path, (err) => {
-                                if (err) {
-                                    console.log(err)
-                                    return
-                                }
-                            })
+            const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
+            Campaign.updateOne({ _id: campaignId }, {
+                artworkUrl: imageUrl
+            })
+                .then(result => {
+                    fs.unlink(path, (err) => {
+                        if (err) {
+                            console.log(err)
+                            return
+                        }
+                    })
 
-                        return res.status(400).json({
-                            message: 'There are no artists. Please create one, first.'
-                        })
-                    }
-
-                    const artworkUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
-                    const campaign = new Campaign({
-                        songName: req.body.songName,
-                        releaseDate: req.body.releaseDate,
-                        artwork: artworkUrl,
-                        userId: req.user.userId,
-                        artistId: artist._id
-                    });
-            
-                    campaign.save()
-                        .then(campaign => {
-                            // delete image out of this server
-                            fs.unlink(path, (err) => {
-                                if (err) {
-                                    console.log(err)
-                                    return
-                                }
-                            })
-                            return res.status(200).json({
-                                result: campaign
-                            })
-                        })
+                    return res.status(200).json({
+                        message: 'Image Updated, Successful.'
+                    })
                 })
                 .catch(err => {
-                    return res.status(500).json({
+                    return res.status(400).json({
                         message: err
                     })
                 })
-            })
-                
-    });
-};
+        })
+    })
+}
 
 exports.getCampaigns = (req, res, next) => {
     const userId = req.user.userId;

@@ -7,10 +7,12 @@ const {
     postLogin,
     postLogout,
     postDeleteUser,
-    getUserProfile
+    getUserProfile,
+    postUploadUserImage
 } = require('../controllers/auth');
 
 router.post('/api/register', postSignup);
+router.post('/api/upload-user-image', auth, postUploadUserImage);
 router.post('/api/login', postLogin);
 router.post('/api/logout', auth, postLogout);
 router.post('/api/delete-user', auth, postDeleteUser);
