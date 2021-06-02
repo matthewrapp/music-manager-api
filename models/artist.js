@@ -7,7 +7,7 @@ const artistSchema = mongoose.Schema({
         default: 'Artist Name',
         maxlength: 100
     },
-    bio: {
+    artistBio: {
         type: String,
         required: true,
         default: 'Artist Bio',
@@ -30,6 +30,10 @@ const artistSchema = mongoose.Schema({
             type: String,
             default: null
         }
+    },
+    imageUrl: {
+        type: String,
+        require: true
     },
     primary: {
         type: Boolean,

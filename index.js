@@ -40,7 +40,21 @@ app.use((req, res, next) => {
 });
 
 // multer
-app.use(upload.single('artworkUrl')); 
+// app.use(upload.single('artworkUrl')); 
+app.use(upload.fields([
+  {
+    name: 'campaignImg',
+    maxCount: 1
+  },
+  {
+    name: 'profileImg',
+    maxCount: 1
+  },
+  {
+    name: 'artistImg',
+    maxCount: 1
+  }
+]));
 
 // Routes go here
 app.use(authRoutes);
