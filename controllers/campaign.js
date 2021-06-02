@@ -6,7 +6,7 @@ const uploadcare = require('../node_modules/uploadcare/lib/main')(`${process.env
 const fs = require('fs');
 
 exports.postCreateCampaign = (req, res, next) => {
-    const path = req.file.path;
+    const path = req.files.campaginImg[0].path;
 
     uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
         if (err) {

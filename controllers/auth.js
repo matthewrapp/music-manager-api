@@ -2,6 +2,9 @@ const User = require('../models/user');
 const Artist = require('../models/artist');
 const Campaign = require('../models/campaign');
 
+const uploadcare = require('../node_modules/uploadcare/lib/main')(`${process.env.UPLOAD_CARE_PUBLIC_KEY}`, `${process.env.UPLOAD_CARE_SECRET_KEY}`);
+const fs = require('fs');
+
 const config = require('../config/config').get(process.env.NODE_ENV);
 
 const jwt = require('jsonwebtoken');
@@ -23,40 +26,123 @@ exports.postSignup = (req, res, next) => {
         });
     }
 
-    // check to see if email exists
-    User.findOne({
-        email: email
-    })
-    .then(user => {
-        if (user) {
-            return res.status(400).json({
-                message: 'User already exists.'
-            })
-        }
-        // hash password and create user
-        bcrypt.hash(password, salt)
-            .then(hashedPassword => {
-                const newUser = User({
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    password: hashedPassword
-                });
-                // save user to db
-                return newUser.save();
-            })
-            .then(result => {
-                return res.status(200).json({
-                    result: result
-                })
-            })
-            .catch(err => {
-                return res.status(500).json({
+    let path;
+    // if there is a path, meaning an image to upload
+    if (req.files !== undefined) {
+        path = req.files.profileImg[0].path;
+
+        uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
+            if (err) {
+                return res.status(400).json({
                     message: err
                 })
+            }
+
+            uploadcare.files.info(response.file, (err, data) => {
+                if (err) {
+                    return res.status(400).json({
+                        message: err
+                    })
+                }
+
+                // check to see if email exists
+                User.findOne({
+                    email: email
+                })
+                    .then(user => {
+                        if (user) {
+                            fs.unlink(path, (err) => {
+                                if (err) {
+                                    console.log(err)
+                                    return
+                                }
+                            })
+
+                            return res.status(400).json({
+                                message: 'User already exists.'
+                            })
+                        }
+        
+                        const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
+    
+                        // hash password and create user
+                        bcrypt.hash(password, salt)
+                            .then(hashedPassword => {
+                                const newUser = User({
+                                    firstName: firstName,
+                                    lastName: lastName,
+                                    email: email,
+                                    password: hashedPassword,
+                                    imageUrl: imageUrl
+                                });
+                                // save user to db
+                                return newUser.save();
+                            })
+                            .then(result => {
+                                fs.unlink(path, (err) => {
+                                    if (err) {
+                                        console.log(err)
+                                        return
+                                    }
+                                })
+                                return res.status(200).json({
+                                    result: result
+                                })
+                            })
+                            .catch(err => {
+                                return res.status(500).json({
+                                    message: err
+                                })
+                            })
+                    })
             })
-    })
-}
+        })
+    } else {
+        // check to see if email exists
+        User.findOne({
+            email: email
+        })
+            .then(user => {
+                if (user) {
+                    fs.unlink(path, (err) => {
+                        if (err) {
+                            console.log(err)
+                            return
+                        }
+                    })
+
+                    return res.status(400).json({
+                        message: 'User already exists.'
+                    })
+                }
+
+                // hash password and create user
+                bcrypt.hash(password, salt)
+                    .then(hashedPassword => {
+                        const newUser = User({
+                            firstName: firstName,
+                            lastName: lastName,
+                            email: email,
+                            password: hashedPassword
+                        });
+                        // save user to db
+                        return newUser.save();
+                    })
+                    .then(result => {
+                        return res.status(200).json({
+                            result: result
+                        })
+                    })
+                    .catch(err => {
+                        return res.status(500).json({
+                            message: err
+                        })
+                    })
+            })
+    } 
+
+    
+};
 
 exports.postLogin = (req, res, next) => {
     const email = req.body.email;
