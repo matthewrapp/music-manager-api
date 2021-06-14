@@ -10,6 +10,7 @@ const config = require('../config/config').get(process.env.NODE_ENV);
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const campaign = require('../models/campaign');
+const e = require('express');
 const salt = 12;
 
 exports.postSignup = (req, res, next) => {
@@ -121,6 +122,33 @@ exports.postUploadUserImage = (req, res, next) => {
 
         })
     })
+}
+
+exports.postUpdateUserInfo = (req, res, next) => {
+    // this updates user email, first & last name
+    const email = req.body.email;
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
+
+    User.findById(req.user.userId)
+        .then(user => {
+            if (!user) {
+                return res.status(400).json({
+                    message: 'User doesn\'t exist. Please sign up.'
+                })
+            }
+            user.firstName = firstName;
+            user.lastName = lastName;
+            user.email = email
+            return user.save()
+        })
+        .then(savedUser => {
+            return res.status(200).json({
+                result: savedUser,
+                message: 'User Updated.'
+            })
+        })
+    
 }
 
 exports.postLogin = (req, res, next) => {
