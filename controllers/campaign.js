@@ -41,48 +41,69 @@ exports.postCreateCampaign = (req, res, next) => {
         })
 };
 
-exports.postUploadCampaignImage = (req, res, next) => {
-    const path = req.files.campaignImg[0].path;
+exports.postUploadCampaignImgUrl = (req, res, next) => {
     const campaignId = req.body.campaignId;
+    const dataUUID = req.body.fileInfo.uuid;
+    const imageUrl = `https://ucarecdn.com/${dataUUID}/-/preview/`;
 
-    uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
-        if (err) {
+    Campaign.updateOne({ _id: campaignId }, {
+                imageUrl: imageUrl
+            })
+        .then(result => {
+            return res.status(200).json({
+                message: 'Image Updated, Successful.',
+                result: result
+            })
+        })
+        .catch(err => {
             return res.status(400).json({
                 message: err
             })
-        }
-        
-        uploadcare.files.info(response.file, (err, data) => {
-            if (err) {
-                return res.status(400).json({
-                    message: err
-                })
-            }
-
-            const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
-            Campaign.updateOne({ _id: campaignId }, {
-                artworkUrl: imageUrl
-            })
-                .then(result => {
-                    fs.unlink(path, (err) => {
-                        if (err) {
-                            console.log(err)
-                            return
-                        }
-                    })
-
-                    return res.status(200).json({
-                        message: 'Image Updated, Successful.'
-                    })
-                })
-                .catch(err => {
-                    return res.status(400).json({
-                        message: err
-                    })
-                })
         })
-    })
 }
+
+// exports.postUploadCampaignImage = (req, res, next) => {
+//     const path = req.files.campaignImg[0].path;
+//     const campaignId = req.body.campaignId;
+
+//     uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
+//         if (err) {
+//             return res.status(400).json({
+//                 message: err
+//             })
+//         }
+        
+//         uploadcare.files.info(response.file, (err, data) => {
+//             if (err) {
+//                 return res.status(400).json({
+//                     message: err
+//                 })
+//             }
+
+//             const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
+//             Campaign.updateOne({ _id: campaignId }, {
+//                 artworkUrl: imageUrl
+//             })
+//                 .then(result => {
+//                     fs.unlink(path, (err) => {
+//                         if (err) {
+//                             console.log(err)
+//                             return
+//                         }
+//                     })
+
+//                     return res.status(200).json({
+//                         message: 'Image Updated, Successful.'
+//                     })
+//                 })
+//                 .catch(err => {
+//                     return res.status(400).json({
+//                         message: err
+//                     })
+//                 })
+//         })
+//     })
+// }
 
 exports.getCampaigns = (req, res, next) => {
     const userId = req.user.userId;

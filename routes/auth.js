@@ -8,12 +8,12 @@ const {
     postLogout,
     postDeleteUser,
     getUserProfile,
-    postUploadUserImage,
+    postUploadUserImgUrl,
     postUpdateUserInfo
 } = require('../controllers/auth');
 
 router.post('/api/register', postSignup);
-router.post('/api/upload-user-image', auth, postUploadUserImage);
+router.post('/api/upload-user-img', auth, postUploadUserImgUrl);
 router.post('/api/update-user-info', auth, postUpdateUserInfo);
 router.post('/api/login', postLogin);
 router.post('/api/logout', auth, postLogout);

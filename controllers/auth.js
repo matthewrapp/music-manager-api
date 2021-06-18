@@ -63,66 +63,87 @@ exports.postSignup = (req, res, next) => {
     
 }
 
-exports.postUploadUserImage = (req, res, next) => {
-    const path = req.files.profileImg[0].path;
+exports.postUploadUserImgUrl = (req, res, next) => {
     const userId = req.user.userId;
-
-    uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
-        if (err) {
+    const dataUUID = req.body.fileInfo.uuid
+    const imageUrl = `https://ucarecdn.com/${dataUUID}/-/preview/`;
+    
+    User.updateOne({ _id: userId }, {
+                imageUrl: imageUrl
+            })
+        .then(result => {
+            return res.status(200).json({
+                message: 'Image Updated, Successful.',
+                result: result
+            })
+        })
+        .catch(err => {
             return res.status(400).json({
                 message: err
             })
-        }
-
-        uploadcare.files.info(response.file, (err, data) => {
-            if (err) {
-                return res.status(400).json({
-                    message: err
-                })
-            }
-
-            const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
-            User.updateOne({ _id: userId }, {
-                imageUrl: imageUrl
-            })
-                .then(result => {
-                    fs.unlink(path, (err) => {
-                        if (err) {
-                            console.log(err)
-                            return
-                        }
-                    })
-
-                    return res.status(200).json({
-                        message: 'Image Updated, Successful.'
-                    })
-                })
-                .catch(err => {
-                    return res.status(400).json({
-                        message: err
-                    })
-                })
-            // this way will be depreciated
-            // User.findByIdAndUpdate(userId, {
-            //     imageUrl: imageUrl
-            // })
-            //     .then(user => {
-            //         fs.unlink(path, (err) => {
-            //             if (err) {
-            //                 console.log(err)
-            //                 return
-            //             }
-            //         })
-
-            //         return res.status(200).json({
-            //             result: user
-            //         })
-            //     })
-
-
         })
-    })
 }
+
+// exports.postUploadUserImage = (req, res, next) => {
+//     const path = req.files.profileImg[0].path;
+//     const userId = req.user.userId;
+
+//     uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
+//         if (err) {
+//             return res.status(400).json({
+//                 message: err
+//             })
+//         }
+
+//         uploadcare.files.info(response.file, (err, data) => {
+//             if (err) {
+//                 return res.status(400).json({
+//                     message: err
+//                 })
+//             }
+
+//             const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
+//             User.updateOne({ _id: userId }, {
+//                 imageUrl: imageUrl
+//             })
+//                 .then(result => {
+//                     fs.unlink(path, (err) => {
+//                         if (err) {
+//                             console.log(err)
+//                             return
+//                         }
+//                     })
+
+//                     return res.status(200).json({
+//                         message: 'Image Updated, Successful.'
+//                     })
+//                 })
+//                 .catch(err => {
+//                     return res.status(400).json({
+//                         message: err
+//                     })
+//                 })
+//             // this way will be depreciated
+//             // User.findByIdAndUpdate(userId, {
+//             //     imageUrl: imageUrl
+//             // })
+//             //     .then(user => {
+//             //         fs.unlink(path, (err) => {
+//             //             if (err) {
+//             //                 console.log(err)
+//             //                 return
+//             //             }
+//             //         })
+
+//             //         return res.status(200).json({
+//             //             result: user
+//             //         })
+//             //     })
+
+
+//         })
+//     })
+// }
 
 exports.postUpdateUserInfo = (req, res, next) => {
     // this updates user email, first & last name

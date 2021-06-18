@@ -79,64 +79,85 @@ exports.postCreateArtist = (req, res, next) => {
         })
 };
 
-exports.postUploadArtistImage = (req, res, next) => {
-    const path = req.files.artistImg[0].path;
+exports.postUploadArtistImgUrl = (req, res, next) => {
     const artistId = req.body.artistId;
-
-    uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
-        if (err) {
+    const dataUUID = req.body.fileInfo.uuid
+    const imageUrl = `https://ucarecdn.com/${dataUUID}/-/preview/`;
+    
+    Artist.updateOne({ _id: artistId }, {
+                imageUrl: imageUrl
+            })
+        .then(result => {
+            return res.status(200).json({
+                message: 'Image Updated, Successful.',
+                result: result
+            })
+        })
+        .catch(err => {
             return res.status(400).json({
                 message: err
             })
-        }
-
-        uploadcare.files.info(response.file, (err, data) => {
-            if (err) {
-                return res.status(400).json({
-                    message: err
-                })
-            }
-
-            const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
-            Artist.updateOne({ _id: artistId }, {
-                imageUrl: imageUrl
-            })
-                .then(result => {
-                    fs.unlink(path, (err) => {
-                        if (err) {
-                            console.log(err)
-                            return
-                        }
-                    })
-
-                    return res.status(200).json({
-                        message: 'Image Updated, Successful.'
-                    })
-                })
-                .catch(err => {
-                    return res.status(400).json({
-                        message: err
-                    })
-                })
-            // this way will be depreciated
-            // Artist.findByIdAndUpdate(artistId, {
-            //     imageUrl: imageUrl
-            // })
-            //     .then(artist => {
-            //         fs.unlink(path, (err) => {
-            //             if (err) {
-            //                 console.log(err)
-            //                 return
-            //             }
-            //         })
-
-            //         return res.status(200).json({
-            //             result: artist
-            //         })
-            //     })
         })
-    })
 }
+
+// exports.postUploadArtistImage = (req, res, next) => {
+//     const path = req.files.artistImg[0].path;
+//     const artistId = req.body.artistId;
+
+//     uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
+//         if (err) {
+//             return res.status(400).json({
+//                 message: err
+//             })
+//         }
+
+//         uploadcare.files.info(response.file, (err, data) => {
+//             if (err) {
+//                 return res.status(400).json({
+//                     message: err
+//                 })
+//             }
+
+//             const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
+//             Artist.updateOne({ _id: artistId }, {
+//                 imageUrl: imageUrl
+//             })
+//                 .then(result => {
+//                     fs.unlink(path, (err) => {
+//                         if (err) {
+//                             console.log(err)
+//                             return
+//                         }
+//                     })
+
+//                     return res.status(200).json({
+//                         message: 'Image Updated, Successful.'
+//                     })
+//                 })
+//                 .catch(err => {
+//                     return res.status(400).json({
+//                         message: err
+//                     })
+//                 })
+//             // this way will be depreciated
+//             // Artist.findByIdAndUpdate(artistId, {
+//             //     imageUrl: imageUrl
+//             // })
+//             //     .then(artist => {
+//             //         fs.unlink(path, (err) => {
+//             //             if (err) {
+//             //                 console.log(err)
+//             //                 return
+//             //             }
+//             //         })
+
+//             //         return res.status(200).json({
+//             //             result: artist
+//             //         })
+//             //     })
+//         })
+//     })
+// }
 
 exports.getAllArtists = (req, res, next) => {
     Artist.find({

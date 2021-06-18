@@ -5,11 +5,11 @@ const auth = require('../middleware/auth');
 const {
     postCreateCampaign,
     getCampaigns,
-    postUploadCampaignImage
+    postUploadCampaignImgUrl
 } = require('../controllers/campaign');
 
 router.post('/api/create-campaign', auth, postCreateCampaign);
-router.post('/api/upload-campaign-image', auth, postUploadCampaignImage);
+router.post('/api/upload-campaign-image', auth, postUploadCampaignImgUrl);
 router.get('/api/get-campaigns', auth, getCampaigns);
     
 module.exports = router;

@@ -5,13 +5,12 @@ const auth = require('../middleware/auth');
 const {
   postCreateArtist,
   getAllArtists,
-  postUploadArtistImage
+  postUploadArtistImgUrl
 } = require('../controllers/artist');
 
 router.post('/api/create-artist', auth, postCreateArtist);
 router.get('/api/artists', auth, getAllArtists);
-router.post('/api/upload-artist-image', auth, postUploadArtistImage);
-
+router.post('/api/upload-artist-img', auth, postUploadArtistImgUrl);
 router.get('/api/check-token', auth, function(req, res) {
   res.sendStatus(200);
 });
