@@ -122,5 +122,10 @@ exports.getCampaigns = (req, res, next) => {
             campaigns: campaigns
         })
     })
+    .catch(err => {
+        return res.status(500).json({
+            message: err
+        })    
+    })
     
 };
