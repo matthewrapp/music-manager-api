@@ -7,18 +7,20 @@ const envs = require('./config/env');
 const config = require('./config/config').get(envs.NODE_ENV);
 
 // multer
-// const multer = require('multer');
+const multer = require('multer');
+const upload = multer();
 // const upload = multer({dest: 'images/'});
 
 const authRoutes = require('./routes/auth');
 const artistRoutes = require('./routes/artist');
 const campaignRoutes = require('./routes/campaign');
+const listRoutes = require('./routes/list');
 
 const app = express();
 
 app.use(
   bodyparser.urlencoded({
-    extended: false,
+    extended: true,
   })
 );
 app.use(bodyparser.json());
@@ -41,6 +43,8 @@ app.use((req, res, next) => {
 });
 
 // multer
+// this handles form-data, just text
+app.use(upload.none());
 // app.use(upload.single('artworkUrl')); 
 // app.use(upload.fields([
 //   {
@@ -61,6 +65,7 @@ app.use((req, res, next) => {
 app.use(authRoutes);
 app.use(artistRoutes);
 app.use(campaignRoutes);
+app.use(listRoutes);
 
 // database connection
 mongoose.Promise = global.Promise;
