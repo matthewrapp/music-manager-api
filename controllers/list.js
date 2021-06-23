@@ -1,10 +1,6 @@
 const User = require('../models/user');
-const Artist = require('../models/artist');
-const Campaign = require('../models/campaign');
 const Contact = require('../models/contact');
 const Task = require('../models/task');
-const task = require('../models/task');
-const contact = require('../models/contact');
 
 // CONTACT CONTROLLERS
 exports.postCreateContact = (req, res, next) => {
