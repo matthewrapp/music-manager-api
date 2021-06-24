@@ -26,7 +26,7 @@ const contactSchema = mongoose.Schema({
     type: {
         type: String,
         require: true,
-        enum: ['spotify', 'applemusic', 'youtube', 'blog', 'management', 'label', 'fan']
+        enum: ['spotify', 'applemusic', 'youtube', 'blog', 'label', 'fan']
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
