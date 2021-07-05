@@ -28,6 +28,11 @@ const contactSchema = mongoose.Schema({
         require: true,
         enum: ['spotify', 'applemusic', 'youtube', 'blog', 'label', 'fan']
     },
+    checked: {
+        type: Boolean,
+        require: true,
+        default: false
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

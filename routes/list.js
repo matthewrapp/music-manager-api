@@ -10,7 +10,8 @@ const {
     postUpdateTask,
     postUpdateContact,
     getAllContacts,
-    getAllTasks
+    getAllTasks,
+    postUpdateChecked
 } = require('../controllers/list');
 
 router.post('/api/create-contact', auth, postCreateContact);
@@ -21,5 +22,6 @@ router.post('/api/update-contact', auth, postUpdateContact);
 router.post('/api/update-task', auth, postUpdateTask);
 router.get('/api/get-contacts', auth, getAllContacts);
 router.get('/api/get-tasks', auth, getAllTasks);
+router.post('/api/update-checked', auth, postUpdateChecked);
     
 module.exports = router;

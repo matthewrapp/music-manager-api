@@ -106,15 +106,13 @@ exports.postUploadCampaignImgUrl = (req, res, next) => {
 // }
 
 exports.getCampaigns = (req, res, next) => {
-    const userId = req.user.userId;
-
     Campaign.find({
-        userId: req.user.userId
+        artistId: req.query.artistId
     })
     .then(campaigns => {
         if (campaigns.length === 0) {
             return res.status(400).json({
-                message: 'There are no artists. Please create one.'
+                message: 'There are no campaigns. Please create one.'
             })
         }
 

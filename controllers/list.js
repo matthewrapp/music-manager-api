@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const Contact = require('../models/contact');
 const Task = require('../models/task');
+const task = require('../models/task');
+const { update } = require('../models/user');
 
 // CONTACT CONTROLLERS
 exports.postCreateContact = (req, res, next) => {
@@ -175,6 +177,7 @@ exports.postCreateTask = (req, res, next) => {
             const newTask = new Task({
                 description: req.body.description,
                 type: req.body.type,
+                checked: req.body.checked,
                 userId: user._id
             });
 
@@ -216,6 +219,61 @@ exports.postDeleteTask = (req, res, next) => {
         })
 }
 
+exports.postUpdateChecked = (req, res, next) => {
+    User.findById(req.user.userId)
+        .then(user => {
+            if (!user || user === null) {
+                return res.status(400).json({
+                    message: 'User doesn\'t exist or must have been deleted in the past. Please sign up.'
+                })
+            }
+            return user
+        })
+        .then(user => {
+            if (req.body.tasks !== undefined) {
+                req.body.tasks.map(updatedTask => {
+                    Task.findById(updatedTask.taskId)
+                        .then(task => {
+                            task.checked = updatedTask.checked;
+                            task.save();
+                            return task;
+                        })
+                        .catch(err => {
+                            return res.status(500).json({
+                                message: err
+                            })
+                        })
+                });
+            }
+
+            if (req.body.contacts !== undefined) {
+                req.body.contacts.map(updatedContact => {
+                    Contact.findById(updatedContact.contactId)
+                        .then(contact => {
+                            contact.checked = updatedContact.checked;
+                            contact.save();
+                            return contact;
+                        })
+                        .catch(err => {
+                            return res.status(500).json({
+                                message: err
+                            })
+                        })
+                })
+            }
+        })
+        .then(result => {
+            return res.status(200).json({
+                message: 'Update Successfull.'
+            })
+        })
+        .catch(err => {
+            return res.status(500).json({
+                message: err
+            })
+        })
+}
+
 exports.postUpdateTask = (req, res, next) => {
     User.findById(req.user.userId)
         .then(user => {
@@ -236,6 +294,7 @@ exports.postUpdateTask = (req, res, next) => {
                     }
                     task.description = req.body.description;
                     task.type = req.body.type;
+                    // task.checked = req.body.checked;
                     task.save();
                     return res.status(200).json({
                         result: task
