@@ -112,7 +112,8 @@ exports.getCampaigns = (req, res, next) => {
     .then(campaigns => {
         if (campaigns.length === 0) {
             return res.status(400).json({
-                message: 'There are no campaigns. Please create one.'
+                message: 'There are no campaigns. Please create one.',
+                campaigns: campaigns
             })
         }
 

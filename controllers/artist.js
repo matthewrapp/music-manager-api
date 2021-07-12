@@ -1,29 +1,23 @@
 const User = require('../models/user');
 const Artist = require('../models/artist');
 
-const uploadcare = require('../node_modules/uploadcare/lib/main')(`${process.env.UPLOAD_CARE_PUBLIC_KEY}`, `${process.env.UPLOAD_CARE_SECRET_KEY}`);
-const fs = require('fs');
-const artist = require('../models/artist');
-
-// const config = require('../config/config').get(process.env.NODE_ENV);
-
-// const jwt = require('jsonwebtoken');
-// const bcrypt = require('bcrypt');
+// const uploadcare = require('../node_modules/uploadcare/lib/main')(`${process.env.UPLOAD_CARE_PUBLIC_KEY}`, `${process.env.UPLOAD_CARE_SECRET_KEY}`);
+// const fs = require('fs');
+// const artist = require('../models/artist');
 // const user = require('../models/user');
-// const salt = 12;
+// const { update } = require('../models/user');
 
 
 exports.postCreateArtist = (req, res, next) => {
     let isPrimaryArtist = false;
             
     User.findById(req.user.userId)
-        .then(user => {
+        .then(async user => {
             if (!user || user === null) {
                 return res.status(500).json({
                     message: 'User doesn\'t exist or must have been deleted in the past. Please sign up.'
                 })
             }
-            
             // setting artist to primary artist if there are no artists yet
             if (user.artists.length === 0) {
                 isPrimaryArtist = true;
@@ -158,6 +152,68 @@ exports.postUploadArtistImgUrl = (req, res, next) => {
 //         })
 //     })
 // }
+
+exports.postUpdateArtist = (req, res, next) => {
+    Artist.findById(req.body.artistId)
+        .then(artist => {
+            if (!user) {
+                return res.status(400).json({
+                    message: 'Artist doesn\'t exist. Please create an artist.'
+                })
+            }
+            artist.artistName = req.body.artistName;
+            artist.artistBio = req.body.artistBio;
+            artist.socialMedia.facebook = req.body.facebook;
+            artist.socialMedia.instagram = req.body.instagram;
+            artist.socialMedia.soundcloud = req.body.instagram;
+            return artist.save()
+        })
+        .then(savedArtist => {
+            return res.status(200).json({
+                result: savedArtist,
+                message: 'User Updated.'
+            })
+        })
+        .catch(err => {
+            return res.status(500).json({
+                message: err
+            })
+        })
+}
+
+exports.postDeleteArtist = async (req, res, next) => {
+    Artist.findById(req.body.artistId)
+        .then(artist => {
+            if (artist.primary) {
+                return res.status(400).json({
+                    artist: artist,
+                    message: 'Can\'t delete a primary artist. Please change your primary artist, then delete this artist.'
+                })
+            }
+            return artist.remove((err) => {
+                if (!err) {
+                    console.log('no error')
+                    User.findOneAndUpdate({ _id: req.user.userId }, { $pull: { artists: artist._id } }, { new: true })
+                        .then(updatedUser => {
+                            return res.status(200).json({
+                                result: updatedUser,
+                                message: 'Aritst successfully deleted.'
+                            })
+                        })
+                } else {
+                    return res.status(400).json({
+                        message: err
+                    })
+                }
+            })
+        })
+        .catch(err => {
+            console.log(err)
+            return res.status(500).json({
+                message: err
+            })
+        })
+}
 
 exports.getAllArtists = (req, res, next) => {
     Artist.find({

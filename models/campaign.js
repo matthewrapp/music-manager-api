@@ -27,6 +27,34 @@ const campaignSchema = mongoose.Schema({
         required: true,
         default: Date.now()
     },
+    contacts: [
+        {
+            contactId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Contact',
+                required: true
+            },
+            checked: {
+                type: Boolean,
+                default: false
+            }
+
+        }
+    ],
+    tasks: [
+        {
+            taskId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Task',
+                required: true
+            },
+            checked: {
+                type: Boolean,
+                default: false
+            }
+
+        }
+    ],
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
