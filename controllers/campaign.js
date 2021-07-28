@@ -1,32 +1,73 @@
 const User = require('../models/user');
 const Artist = require('../models/artist');
 const Campaign = require('../models/campaign');
-
-const uploadcare = require('../node_modules/uploadcare/lib/main')(`${process.env.UPLOAD_CARE_PUBLIC_KEY}`, `${process.env.UPLOAD_CARE_SECRET_KEY}`);
-const fs = require('fs');
+const Contact = require('../models/contact');
+const Task = require('../models/task');
 
 exports.postCreateCampaign = (req, res, next) => {
-    
     Artist.findById(req.body.artistId)
-        .then(artist => {
+        .then(async artist => {
             if (artist === null) {
                 return res.status(400).json({
                     message: 'There are no artists. Please create one, first.'
                 })
             }
 
+            const contactObj = await Contact.find()
+                .then(contacts => {
+                    return contacts.map(contact => {
+                        return {
+                            contactId: contact._id,
+                            checked: false
+                        }
+                    })
+                })
+                .catch(err => {
+                    return res.status(400).json({
+                        message: err
+                    })
+                })
+                
+            const taskObj = await Task.find()
+                .then(tasks => {
+                    return tasks.map(task => {
+                        return {
+                            taskId: task._id,
+                            checked: false
+                        }
+                    })
+                })
+                .catch(err => {
+                    return res.status(400).json({
+                        message: err
+                    })
+                })
+            
+            
             const campaign = new Campaign({
                 songName: req.body.songName,
                 releaseDate: req.body.releaseDate,
+                contacts: contactObj,
+                tasks: taskObj,
                 userId: req.user.userId,
                 artistId: artist._id
             });
     
             campaign.save()
                 .then(campaign => {
-                    return res.status(200).json({
-                        result: campaign
-                    })
+                    Artist.findById(req.body.artistId)
+                        .then(artist => {
+                            artist.campaigns.push(campaign);
+                            artist.save();
+                            return res.status(200).json({
+                                result: campaign
+                            })
+                        })
+                        .catch(err => {
+                            return res.status(400).json({
+                                message: err
+                            })
+                        })
                 })
                 .catch(err => {
                     return res.status(400).json({
@@ -62,49 +103,6 @@ exports.postUploadCampaignImgUrl = (req, res, next) => {
         })
 }
 
-// exports.postUploadCampaignImage = (req, res, next) => {
-//     const path = req.files.campaignImg[0].path;
-//     const campaignId = req.body.campaignId;
-
-//     uploadcare.file.upload(fs.createReadStream(path), (err, response) => {
-//         if (err) {
-//             return res.status(400).json({
-//                 message: err
-//             })
-//         }
-        
-//         uploadcare.files.info(response.file, (err, data) => {
-//             if (err) {
-//                 return res.status(400).json({
-//                     message: err
-//                 })
-//             }
-
-//             const imageUrl = `https://ucarecdn.com/${data.uuid}/-/preview/`;
-//             Campaign.updateOne({ _id: campaignId }, {
-//                 artworkUrl: imageUrl
-//             })
-//                 .then(result => {
-//                     fs.unlink(path, (err) => {
-//                         if (err) {
-//                             console.log(err)
-//                             return
-//                         }
-//                     })
-
-//                     return res.status(200).json({
-//                         message: 'Image Updated, Successful.'
-//                     })
-//                 })
-//                 .catch(err => {
-//                     return res.status(400).json({
-//                         message: err
-//                     })
-//                 })
-//         })
-//     })
-// }
-
 exports.getCampaigns = (req, res, next) => {
     Campaign.find({
         artistId: req.query.artistId
@@ -126,5 +124,36 @@ exports.getCampaigns = (req, res, next) => {
             message: err
         })    
     })
-    
 };
+
+exports.postDeleteCampaign = (req, res, next) => {
+    Campaign.findById(req.body.campaignId)
+        .then(campaign => {
+            if (campaign === null) {
+                return res.status(400).json({
+                    message: 'Campaign doesn\'t exist.'
+                })
+            }
+
+            return campaign.remove((err) => {
+                if (!err) {
+                    Artist.findOneAndUpdate({ _id: req.body.artistId }, { $pull: { campaigns: campaign._id } }, { new: true })
+                        .then(updatedArtist => {
+                            return res.status(200).json({
+                                result: updatedArtist,
+                                message: 'Campaign successfully deleted.'
+                            })
+                        })
+                } else {
+                    return res.status(400).json({
+                        message: err
+                    })
+                }
+            })
+        })
+        .catch(err => {
+            return res.status(500).json({
+                message: err
+            })
+        })
+}

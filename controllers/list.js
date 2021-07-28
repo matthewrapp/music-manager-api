@@ -1,8 +1,9 @@
 const User = require('../models/user');
 const Contact = require('../models/contact');
 const Task = require('../models/task');
+const Campaign = require('../models/campaign');
+const campaign = require('../models/campaign');
 const task = require('../models/task');
-const { update } = require('../models/user');
 
 // CONTACT CONTROLLERS
 exports.postCreateContact = (req, res, next) => {
@@ -19,12 +20,13 @@ exports.postCreateContact = (req, res, next) => {
              Contact.findOne({
                     email: req.body.email
                 })
-                 .then(contact => {
+                 .then(async contact => {
                     if (contact !== null) {
                         return res.status(400).json({
                             message: 'Contact already exists.'
                         })
                     }
+                    const allCampaigns = await Campaign.find();
                     const newContact = new Contact({
                         firstName: req.body.firstName,
                         lastName: req.body.lastName,
@@ -34,7 +36,22 @@ exports.postCreateContact = (req, res, next) => {
                         userId: user._id
                     });
 
-                    newContact.save();
+                    newContact.save()
+                        .then(contact => {
+                            allCampaigns.forEach(campaign => {
+                                campaign.contacts.push({
+                                    contactId: contact._id,
+                                    checked: false
+                                })
+                                campaign.save();
+                            })
+                            return
+                        })
+                        .catch(err => {
+                            return res.status(400).json({
+                                message: err
+                            })
+                        })
                     return res.status(200).json({
                         result: newContact
                     })
@@ -53,29 +70,45 @@ exports.postCreateContact = (req, res, next) => {
          })
 }
 
-exports.postDeleteContact = (req, res, next) => {
+exports.postDeleteContact = async (req, res, next) => {
     if (!req.body.contactId) {
         return res.status(400).json({
             message: 'There is no contact. Please select the contact you want to delete.'
         })
     }
-
-    Contact.findByIdAndDelete(req.body.contactId)
-        .then(result => {
-            if (result === null) {
+    
+    const contactToDelete = await Contact.findById(req.body.contactId);
+    Campaign.find()
+        .then(campaigns => {
+            if (campaigns === null) {
                 return res.status(400).json({
-                    message: 'Contact already deleted.'
+                    message: 'No campaigns. Please create one.'
                 })
             }
 
-            return res.status(200).json({
-                result: result
+            // delete reference of contact within the campaign
+            return campaigns.map(campaign => {
+                return campaign.contacts.find((contact, index) => {
+                    if (contact.contactId == req.body.contactId) {
+                        campaign.contacts.splice(index, 1);
+                        campaign.save();
+                        return contact
+                    }
+                })
             })
         })
-        .catch(err => {
-            return res.status(500).json({
-                message: err
-            })
+        .then(contact => {
+            contactToDelete.remove(err => {
+                if (!err) {
+                    return res.status(200).json({
+                        result: 'Success'
+                    })
+                } else {
+                    return res.status(400).json({
+                        message: err
+                    })
+                }
+           })
         })
 }
 
@@ -173,15 +206,30 @@ exports.postCreateTask = (req, res, next) => {
             }
             return user
         })
-         .then(user => {             
+         .then(async user => {             
             const newTask = new Task({
                 description: req.body.description,
                 type: req.body.type,
                 checked: req.body.checked,
                 userId: user._id
             });
-
-            newTask.save();
+            const allCampaigns = await Campaign.find();
+            newTask.save()
+                .then(task => {
+                    allCampaigns.forEach(campaign => {
+                        campaign.tasks.push({
+                            taskId: task._id,
+                            checked: false
+                        })
+                        campaign.save();
+                    })
+                    return
+                })
+                .catch(err => {
+                    return res.status(400).json({
+                        message: err
+                    })
+                })
             return res.status(200).json({
                 result: newTask
             })
@@ -193,29 +241,45 @@ exports.postCreateTask = (req, res, next) => {
          })
 }
 
-exports.postDeleteTask = (req, res, next) => {
+exports.postDeleteTask = async (req, res, next) => {
     if (!req.body.taskId) {
         return res.status(400).json({
             message: 'There is no task. Please select the task you want to delete.'
         })
     }
+    const taskToDelete = await Task.findById(req.body.taskId);
 
-    Task.findByIdAndDelete(req.body.taskId)
-        .then(result => {
-            if (result === null) {
+    Campaign.find()
+        .then(campaigns => {
+            if (campaigns === null) {
                 return res.status(400).json({
-                    message: 'Task already deleted.'
+                    message: 'No campaigns. Please create one.'
                 })
             }
+            // delete reference of task within the campaign
+            return campaigns.map(campaign => {
+                return campaign.tasks.find((task, index) => {
+                    if (task.taskId == req.body.taskId) {
+                        campaign.tasks.splice(index, 1);
+                        campaign.save();
+                        return task
+                    }
+                })
+            })
 
-            return res.status(200).json({
-                result: result
-            })
         })
-        .catch(err => {
-            return res.status(500).json({
-                message: err
-            })
+        .then(task => {
+            taskToDelete.remove(err => {
+                if (!err) {
+                    return res.status(200).json({
+                        result: 'Success'
+                    })
+                } else {
+                    return res.status(400).json({
+                        message: err
+                    })
+                }
+           })
         })
 }
 

@@ -44,7 +44,12 @@ const artistSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    }
+    },
+    campaigns: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Campaign',
+        default: null
+    }]
 });
 
 module.exports = mongoose.model('Artist', artistSchema);

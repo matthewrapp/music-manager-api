@@ -15,11 +15,6 @@ const taskSchema = mongoose.Schema({
         require: true,
         enum: ['socialmedia', 'submissions', 'creative/content', 'other']
     },
-    // checked: {
-    //     type: Boolean,
-    //     require: true,
-    //     default: false
-    // },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
